@@ -2,11 +2,11 @@
 
 WordPress plugin to store user roles and user levels in a taxonomy, for performance.
 
-Having many users in a WordPress database leads to some bad performance when it comes to query for users by role, user level, or counting users. This is perticulaoily an problem because the default WordPress admin users list table, post table and post edit screen all make these queries.
+Having many users in a WordPress database leads to some bad performance when it comes to quering for users by role, user level, or counting users. This is perticulaoily a problem because the default WordPress admin users list table, post table and post edit screens all make these queries.
 
-The fundamental issue with the default WordPress storage mechanism is the user of Post Meta for user levels and roles. To add insult to injury, roles are stored as a serilalized array, so any queries for users by role results in a MySQL `LIKE` query on an unindexed text column (`meta_value`).
+The fundamental issue with the default WordPress storage mechanism is the use of Post Meta for user levels and roles. To add insult to injury, roles are stored as a serilalized array, so any queries for users by role results in a MySQL `LIKE` query on an unindexed text column (`meta_value`).
 
-Roles to Taxonomy registers two shadow taxonomies to associate user objects with role/user level terms. This results in a much faster lookup for getting users in a given role. The term `count` field can also be used to calculate user counts in some cases too.
+Roles to Taxonomy registers two shadow taxonomies to associate user objects with role/user level terms. This results in a much faster lookup for  users in a given role. The term `count` field is also be used to calculate user counts in some cases.
 
 ## Performance Comparisons (2.2 million network users, 1.5 million on a single site)
 
