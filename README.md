@@ -10,8 +10,8 @@ Roles to Taxonomy registers two shadow taxonomies to associate user objects with
 
 ## Performance Comparisons (2.2 million network users, 1.5 million on a single site)
 
-|WordPress Default|Roles to Taxonomy|
-|---|---|
+|Page|WordPress Default|Roles to Taxonomy|
+|---|---|---|
 |User List Table (all)|36 **seconds**|7 milliseconds|
 |User List Table (specific role)|29 **seconds**|5 milliseconds|
 |Post List Table|31 seconds|2 seconds|
