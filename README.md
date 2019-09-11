@@ -2,11 +2,11 @@
 
 WordPress plugin to store user roles and user levels in a taxonomy, for performance.
 
-Having many users in a WordPress database leads to some bad performance when it comes to quering for users by role, user level, or counting users. This is perticulaoily a problem because the default WordPress admin users list table, post table and post edit screens all make these queries.
+Having many users in a WordPress database leads to some bad performance when it comes to quering for users by role, user level, or counting users. This is particularly a problem because the default WordPress admin users list table, post table and post edit screens all make these queries.
 
-The fundamental issue with the default WordPress storage mechanism is the use of Post Meta for user levels and roles. To add insult to injury, roles are stored as a serilalized array, so any queries for users by role results in a MySQL `LIKE` query on an unindexed text column (`meta_value`).
+The fundamental issue with the default WordPress storage mechanism is the use of Post Meta for user levels and roles. To add insult to injury, roles are stored as a serialized array, so any queries for users by role results in a MySQL `LIKE` query on an unindexed text column (`meta_value`).
 
-Roles to Taxonomy registers two shadow taxonomies to associate user objects with role/user level terms. This results in a much faster lookup for  users in a given role. The term `count` field is also be used to calculate user counts in some cases.
+Roles to Taxonomy registers two shadow taxonomies to associate user objects with role/user level terms. This results in a much faster lookup for users in a given role. The term `count` field is also be used to calculate user counts in some cases.
 
 ## Performance Comparisons (2.2 million network users, 1.5 million on a single site)
 
@@ -25,7 +25,7 @@ When you activate the plugin, you will need to backfill the taxonomies with the 
 wp roles-to-taxonomy sync [--verbose] [--batch-size=<number>] [--progress] [--offset=<number>] [--fast-populate] [--limit=<number>]
 ```
 
-- `batch-size=x` dictactes the chunks of users to process at a time. If you have 10,000+ users, you'll want to set this to reasonable chunks (say 5,000) no not exhaust all available memory.
+- `batch-size=x` dictates the chunks of users to process at a time. If you have 10,000+ users, you'll want to set this to reasonable chunks (say 5,000) to not exhaust all available memory.
 - `progress` will output a progress bar.
 - `limit=x` will restrict the total amount of user roles synced to taxonomies.
 - `offset=x` will resume updating users from a given offset number.
