@@ -1,0 +1,13 @@
+{
+    "name": "altis/roles-to-taxonomy",
+    "description": "WordPress plugin to store user roles and user levels in a taxonomy, for performance.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Joe Hoyle",
+            "email": "joehoyle@gmail.com"
+        }
+    ],
+    "require": {}
+}
