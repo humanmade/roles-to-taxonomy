@@ -4,6 +4,7 @@ namespace Altis\Roles_To_Taxonomy;
 
 use WP_CLI;
 use WP_CLI_Command;
+use WP_CLI\Utils;
 
 class CLI_Command extends WP_CLI_Command {
 
@@ -48,7 +49,7 @@ class CLI_Command extends WP_CLI_Command {
 			}
 			$total_users = $wpdb->get_var( "SELECT count(ID) FROM $wpdb->users" ) - $args_assoc['offset'];
 			$total_users = $args_assoc['limit'] ? min( $total_users, $args_assoc['limit'] ) : $total_users;
-			$progress_bar = WP_CLI\Utils\make_progress_bar( sprintf( 'Syncing %d Users', $total_users ), $total_users );
+			$progress_bar = Utils\make_progress_bar( sprintf( 'Syncing %d Users', $total_users ), $total_users );
 		}
 
 		$roles_terms_map = [];
@@ -86,7 +87,7 @@ class CLI_Command extends WP_CLI_Command {
 						$insert_values[] = $wpdb->prepare( '(%d, %d, 0)', $cap_user->user_id, $term_id );
 					}
 					$synced++;
-					if ( $args_assoc['progress'] ) {
+					if ( isset( $progress_bar ) ) {
 						$progress_bar->tick();
 					}
 					if ( $args_assoc['verbose'] ) {
@@ -133,7 +134,7 @@ class CLI_Command extends WP_CLI_Command {
 					set_user_role( $user->ID, $role );
 
 					$synced++;
-					if ( $args_assoc['progress'] ) {
+					if ( isset( $progress_bar ) ) {
 						$progress_bar->tick();
 					}
 					if ( $args_assoc['verbose'] ) {
@@ -183,7 +184,7 @@ class CLI_Command extends WP_CLI_Command {
 			wp_defer_term_counting( false );
 		}
 
-		if ( $args_assoc['progress'] ) {
+		if ( isset( $progress_bar ) ) {
 			$progress_bar->finish();
 		}
 		WP_CLI::success( sprintf( 'Synced %d users.', $synced ) );
