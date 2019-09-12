@@ -102,7 +102,7 @@ class CLI_Command extends WP_CLI_Command {
 					)
 				);
 				foreach ( $user_levels as $level_user_row ) {
-					$user_level = $level_user_row->meta_value;
+					$user_level = 'level_' . $level_user_row->meta_value;
 					if ( isset( $user_level_terms_map[ $user_level ] ) ) {
 						$term_id = $user_level_terms_map[ $user_level ];
 					} else {
