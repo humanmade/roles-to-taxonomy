@@ -120,7 +120,6 @@ function add_tax_query_to_wp_user_query( WP_User_Query $query ) {
 		'has_published_posts' => null,
 		'nicename'            => '',
 		'nicename__in'        => [],
-		'nicename__in'        => [],
 		'nicename__not_in'    => [],
 		'login'               => '',
 		'login__in'           => [],
