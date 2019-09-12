@@ -61,7 +61,7 @@ class CLI_Command extends WP_CLI_Command {
 			if ( $args_assoc['fast-populate'] ) {
 				$caps = $wpdb->get_results(
 					$wpdb->prepare(
-						"SELECT user_id, meta_value FROM $wpdb->usermeta WHERE user_id IN ( " . implode( ', ', $users ) . ' ) AND meta_key = %s',
+						"SELECT user_id, meta_value FROM $wpdb->usermeta WHERE user_id IN ( " . implode( ', ', $users ) . ' ) AND meta_key = %s', // @codingStandardsIgnoreLine
 						$wpdb->prefix . 'capabilities'
 					)
 				);
@@ -78,9 +78,9 @@ class CLI_Command extends WP_CLI_Command {
 						} else {
 							$term = term_exists( $role, ROLES_TAXONOMY );
 							if ( $term ) {
-								$term_id = $term['term_id'];
+								$term_id = $term['term_taxonomy_id'];
 							} else {
-								$term_id = wp_insert_term( $role, ROLES_TAXONOMY )['term_id'];
+								$term_id = wp_insert_term( $role, ROLES_TAXONOMY )['term_taxonomy_id'];
 							}
 							$roles_terms_map[ $role ] = $term_id;
 						}
@@ -97,7 +97,7 @@ class CLI_Command extends WP_CLI_Command {
 
 				$user_levels = $wpdb->get_results(
 					$wpdb->prepare(
-						"SELECT user_id, meta_value FROM $wpdb->usermeta WHERE user_id IN ( " . implode( ', ', $users ) . ' ) AND meta_key = %s',
+						"SELECT user_id, meta_value FROM $wpdb->usermeta WHERE user_id IN ( " . implode( ', ', $users ) . ' ) AND meta_key = %s', // @codingStandardsIgnoreLine
 						$wpdb->prefix . 'user_level'
 					)
 				);
@@ -108,9 +108,9 @@ class CLI_Command extends WP_CLI_Command {
 					} else {
 						$term = term_exists( $user_level, USER_LEVELS_TAXONOMY );
 						if ( $term ) {
-							$term_id = $term['term_id'];
+							$term_id = $term['term_taxonomy_id'];
 						} else {
-							$term_id = wp_insert_term( $user_level, USER_LEVELS_TAXONOMY )['term_id'];
+							$term_id = wp_insert_term( $user_level, USER_LEVELS_TAXONOMY )['term_taxonomy_id'];
 						}
 						$user_level_terms_map[ $user_level ] = $term_id;
 					}
@@ -169,6 +169,7 @@ class CLI_Command extends WP_CLI_Command {
 					[
 						'fields' => 'ids',
 						'taxonomy' => ROLES_TAXONOMY,
+						'hide_empty' => false,
 					]
 				), ROLES_TAXONOMY
 			);
@@ -177,6 +178,7 @@ class CLI_Command extends WP_CLI_Command {
 					[
 						'fields' => 'ids',
 						'taxonomy' => USER_LEVELS_TAXONOMY,
+						'hide_empty' => false,
 					]
 				), USER_LEVELS_TAXONOMY
 			);
