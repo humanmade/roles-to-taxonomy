@@ -106,6 +106,10 @@ function add_tax_query_to_wp_user_query( WP_User_Query $query ) {
 			'field'      => 'slug',
 			'operator'   => 'NOT IN',
 		];
+		$tax_query[] = [
+			'taxonomy'   => USER_LEVELS_TAXONOMY,
+			'operator'   => 'EXISTS',
+		];
 	}
 
 	// If there are no query vars except for roles or blog_id, override the handling of found_rows
@@ -200,9 +204,8 @@ function add_tax_query_clauses_to_wp_user_query( WP_User_Query $query ) {
  */
 function set_user_role( int $user_id, ?string $role ) {
 	$user = get_userdata( $user_id );
-
 	wp_set_object_terms( $user_id, $role ?: [], ROLES_TAXONOMY, false );
-	wp_set_object_terms( $user_id, $user->user_level ? 'level_' . $user->user_level: [], USER_LEVELS_TAXONOMY, false );
+	wp_set_object_terms( $user_id, isset( $user->user_level ) ? 'level_' . $user->user_level : [], USER_LEVELS_TAXONOMY, false );
 }
 
 /**
