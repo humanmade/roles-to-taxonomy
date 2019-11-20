@@ -2,7 +2,7 @@
 
 /*
 * Plugin Name: Roles to Taxonomy
-* Description: Stole user's roles in a taxonomy, for performance.
+* Description: Store user's roles in a taxonomy, for performance.
 */
 
 namespace Altis\Roles_To_Taxonomy;
