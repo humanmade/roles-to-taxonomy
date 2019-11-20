@@ -56,9 +56,13 @@ class CLI_Command extends WP_CLI_Command {
 		$user_level_terms_map = [];
 
 		while ( $users = get_users( $users_args ) ) {
+
+			// Fast-populate will bulk-insert records for the amount of the "batch-size"
 			$insert_values = [];
 
 			if ( $args_assoc['fast-populate'] ) {
+				// Fetch all the capabilies for this chunk of users in one query.
+				// We do this because it's faster to fetch all at once.
 				$caps = $wpdb->get_results(
 					$wpdb->prepare(
 						"SELECT user_id, meta_value FROM $wpdb->usermeta WHERE user_id IN ( " . implode( ', ', $users ) . ' ) AND meta_key = %s', // @codingStandardsIgnoreLine
@@ -94,7 +98,7 @@ class CLI_Command extends WP_CLI_Command {
 						WP_CLI::line( sprintf( 'Synced user %d with role %s', $cap_user->user_id, $role ) );
 					}
 				}
-
+				// Just like caps, fetch all the user roles at once.
 				$user_levels = $wpdb->get_results(
 					$wpdb->prepare(
 						"SELECT user_id, meta_value FROM $wpdb->usermeta WHERE user_id IN ( " . implode( ', ', $users ) . ' ) AND meta_key = %s', // @codingStandardsIgnoreLine
@@ -118,14 +122,17 @@ class CLI_Command extends WP_CLI_Command {
 					$insert_values[] = $wpdb->prepare( '(%d, %d, 0)', $level_user_row->user_id, $term_id );
 				}
 
-				$insert = sprintf(
-					"INSERT into $wpdb->term_relationships ( object_id, term_taxonomy_id, term_order ) VALUES %s",
-					implode( ', ', $insert_values )
-				);
-
-				$result = $wpdb->query( $insert );
-				if ( ! $result ) {
-					WP_CLI::line( 'Could not run insert query. ' . $wpdb->last_error );
+				// It's possible there is no rows to insert because none of the users have roles on this site.
+				if ( $insert_values ) {
+					// Run one large insert query for all the users at once.
+					$insert = sprintf(
+						"INSERT into $wpdb->term_relationships ( object_id, term_taxonomy_id, term_order ) VALUES %s",
+						implode( ', ', $insert_values )
+					);
+					$result = $wpdb->query( $insert );
+					if ( ! $result ) {
+						WP_CLI::line( 'Could not run insert query. ' . $wpdb->last_error );
+					}
 				}
 			} else {
 				foreach ( $users as $user_id ) {
@@ -162,8 +169,15 @@ class CLI_Command extends WP_CLI_Command {
 			$wp_object_cache->cache = [];
 		}
 
+		// When using fast-populate we have to do some extra cleanup. Because the term
+		// relationships were inserted directly into the database, we need to clear the
+		// object cache. Also, the term counds need updating.
 		if ( $args_assoc['fast-populate'] ) {
 			wp_cache_flush();
+
+			// Todo: this doesn't seem to work, I think because
+			// wp_update_term_count_now expects the objects to be
+			// posts.
 			wp_update_term_count_now(
 				get_terms(
 					[
