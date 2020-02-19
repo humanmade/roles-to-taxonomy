@@ -12,6 +12,7 @@ const USER_LEVELS_TAXONOMY = 'user_levels';
 function bootstrap() {
 	add_action( 'pre_get_users', __NAMESPACE__ . '\\add_tax_query_to_wp_user_query' );
 	add_action( 'pre_user_query', __NAMESPACE__ . '\\add_tax_query_clauses_to_wp_user_query' );
+	add_action( 'pre_user_query', __NAMESPACE__ . '\\add_has_published_posts_clauses_to_wp_user_query' );
 	add_action( 'users_pre_query', __NAMESPACE__ . '\\set_wp_user_query_count_total', 10, 2 );
 	add_action( 'set_user_role', __NAMESPACE__ . '\\set_user_role', 10, 3 );
 	add_action( 'init', __NAMESPACE__ . '\\register_roles_taxonomies' );
@@ -193,6 +194,40 @@ function add_tax_query_clauses_to_wp_user_query( WP_User_Query $query ) {
 	if ( $restore_blog ) {
 		restore_current_blog();
 	}
+}
+
+/**
+ * Add the has_published_posts SQL clauses back into the WP User Query.
+ *
+ * The has_published_posts flag to WP_User_Query is only effective if
+ * the `blog_id` param is set. Because we specifically unset this param
+ * in add_tax_query_to_wp_user_query() (to avoid unwanted user-meta cap
+ * sql clauses) we have to manually re-add the needed SQL for has_published_posts.
+ *
+ * @param WP_User_Query $query
+ * @return void
+ */
+function add_has_published_posts_clauses_to_wp_user_query( WP_User_Query $query ) {
+	if ( ! $query->get( 'has_published_posts' ) || ! $query->get( 'original_blog_id' ) || $query->get( 'blog_id' ) ) {
+		return;
+	}
+
+	$blog_id = $query->get( 'origin_blog_id' );
+
+	if ( true === $query->get( 'has_published_posts' ) ) {
+		$post_types = get_post_types( [ 'public' => true ] );
+	} else {
+		$post_types = (array) $query->get( 'has_published_posts' );
+	}
+
+	global $wpdb;
+
+	foreach ( $post_types as &$post_type ) {
+		$post_type = $wpdb->prepare( '%s', $post_type );
+	}
+
+	$posts_table = $wpdb->get_blog_prefix( $blog_id ) . 'posts';
+	$query->query_where .= " AND $wpdb->users.ID IN ( SELECT DISTINCT $posts_table.post_author FROM $posts_table WHERE $posts_table.post_status = 'publish' AND $posts_table.post_type IN ( " . join( ', ', $post_types ) . ' ) )';
 }
 
 /**
