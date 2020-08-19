@@ -355,14 +355,14 @@ function remove_user_tax_meta( int $user_id, int $blog_id ) : void {
 	}
 
 	$user_roles = wp_get_object_terms( $user_id, ROLES_TAXONOMY );
-	array_map( function( $user_role ) use ( $user_id ) {
+	foreach( $user_roles as $user_role ) {
 		wp_remove_object_terms( $user_id, $user_role->term_id, ROLES_TAXONOMY, true );
-	}, $user_roles );
+	}
 
 	$user_levels = wp_get_object_terms( $user_id, USER_LEVELS_TAXONOMY );
-	array_map( function( $user_level ) use ( $user_id ) {
+	foreach( $user_levels as $user_level ) {
 		wp_remove_object_terms( $user_id, $user_level->term_id, USER_LEVELS_TAXONOMY, true );
-	}, $user_levels );
+	}
 
 	if ( $restore_blog ) {
 		restore_current_blog();
