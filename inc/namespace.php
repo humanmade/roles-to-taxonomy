@@ -17,6 +17,7 @@ function bootstrap() {
 	add_action( 'set_user_role', __NAMESPACE__ . '\\set_user_role', 10, 3 );
 	add_action( 'init', __NAMESPACE__ . '\\register_roles_taxonomies' );
 	add_filter( 'pre_count_users', __NAMESPACE__ . '\\get_count_users', 10, 3 );
+	add_action( 'remove_user_from_blog', __NAMESPACE__ . '\\remove_user_tax_meta', 10, 2 );
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		require_once __DIR__ . '/class-cli-command.php';
@@ -337,4 +338,33 @@ function set_wp_user_query_count_total( $null, WP_User_Query $query ) {
 	$query->total_users = $count;
 
 	return $null;
+}
+
+/**
+ * Remove user tax meta when deleting user from subsite.
+ *
+ * @param int $user_id ID of the user being removed.
+ * @param int $blog_id ID of the blog the user is being removed from. Default 0.
+ * @return void
+ */
+function remove_user_tax_meta( int $user_id, int $blog_id ) : void {
+	$restore_blog = false;
+	if ( $blog_id !== get_current_blog_id() ) {
+		switch_to_blog( $blog_id );
+		$restore_blog = true;
+	}
+
+	$user_roles = wp_get_object_terms( $user_id, ROLES_TAXONOMY );
+	foreach( $user_roles as $user_role ) {
+		wp_remove_object_terms( $user_id, $user_role->term_id, ROLES_TAXONOMY, true );
+	}
+
+	$user_levels = wp_get_object_terms( $user_id, USER_LEVELS_TAXONOMY );
+	foreach( $user_levels as $user_level ) {
+		wp_remove_object_terms( $user_id, $user_level->term_id, USER_LEVELS_TAXONOMY, true );
+	}
+
+	if ( $restore_blog ) {
+		restore_current_blog();
+	}
 }
