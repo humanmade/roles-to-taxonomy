@@ -228,7 +228,13 @@ function add_has_published_posts_clauses_to_wp_user_query( WP_User_Query $query 
 	}
 
 	$posts_table = $wpdb->get_blog_prefix( $blog_id ) . 'posts';
-	$query->query_where .= " AND $wpdb->users.ID IN ( SELECT DISTINCT $posts_table.post_author FROM $posts_table WHERE $posts_table.post_status = 'publish' AND $posts_table.post_type IN ( " . join( ', ', $post_types ) . ' ) )';
+
+	$user_to_posts_where = "$wpdb->users.ID IN ( SELECT DISTINCT $posts_table.post_author FROM $posts_table WHERE $posts_table.post_status = 'publish' AND $posts_table.post_type IN ( " . join( ', ', $post_types ) . ' ) )';
+
+	if ( apply_filters( 'roles_to_taxonomy_optimize_for_more_posts_than_users', false ) ) {
+		$user_to_posts_where = "EXISTS ( SELECT 1 FROM $wpdb->posts WHERE $wpdb->posts.post_author = $wpdb->users.id AND $wpdb->posts.post_status = 'publish' AND $wpdb->posts.post_type IN ( " . join( ', ', $post_types ) . ' ) )';
+	}
+	$query->query_where .= " AND $user_to_posts_where";
 }
 
 /**
