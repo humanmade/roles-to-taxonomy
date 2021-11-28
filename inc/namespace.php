@@ -15,6 +15,8 @@ function bootstrap() {
 	add_action( 'pre_user_query', __NAMESPACE__ . '\\add_has_published_posts_clauses_to_wp_user_query' );
 	add_action( 'users_pre_query', __NAMESPACE__ . '\\set_wp_user_query_count_total', 10, 2 );
 	add_action( 'set_user_role', __NAMESPACE__ . '\\set_user_role', 10, 3 );
+	add_action( 'add_user_role', __NAMESPACE__ . '\\add_user_role', 10, 2 );
+	add_action( 'remove_user_role', __NAMESPACE__ . '\\remove_user_role', 10, 2 );
 	add_action( 'init', __NAMESPACE__ . '\\register_roles_taxonomies' );
 	add_filter( 'pre_count_users', __NAMESPACE__ . '\\get_count_users', 10, 3 );
 	add_action( 'remove_user_from_blog', __NAMESPACE__ . '\\remove_user_tax_meta', 10, 2 );
@@ -247,6 +249,38 @@ function add_has_published_posts_clauses_to_wp_user_query( WP_User_Query $query 
 function set_user_role( int $user_id, ?string $role ) {
 	$user = get_userdata( $user_id );
 	wp_set_object_terms( $user_id, $role ?: [], ROLES_TAXONOMY, false );
+	wp_set_object_terms( $user_id, isset( $user->user_level ) ? 'level_' . $user->user_level : [], USER_LEVELS_TAXONOMY, false );
+}
+
+/**
+ * Set the user's role.
+ *
+ * @param integer $user_id
+ * @param string $role
+ * @return void
+ */
+function add_user_role( int $user_id, ?string $role ) {
+	$user = get_userdata( $user_id );
+
+	// Append (4th param), rather than replacing.
+	wp_set_object_terms( $user_id, $role ?: [], ROLES_TAXONOMY, true );
+
+	// Also reset user level as needed.
+	wp_set_object_terms( $user_id, isset( $user->user_level ) ? 'level_' . $user->user_level : [], USER_LEVELS_TAXONOMY, false );
+}
+
+/**
+ * Set the user's role.
+ *
+ * @param integer $user_id
+ * @param string $role
+ * @return void
+ */
+function remove_user_role( int $user_id, ?string $role ) {
+	$user = get_userdata( $user_id );
+	wp_remove_object_terms( $user_id, $role, ROLES_TAXONOMY );
+
+	// Also reset user level as needed.
 	wp_set_object_terms( $user_id, isset( $user->user_level ) ? 'level_' . $user->user_level : [], USER_LEVELS_TAXONOMY, false );
 }
 
