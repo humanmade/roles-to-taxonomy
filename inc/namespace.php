@@ -292,7 +292,7 @@ function remove_user_role( int $user_id, ?string $role ) {
  * @param integer $blog_id
  * @return array
  */
-function get_count_users( $users = null, string $strategy, int $blog_id ) {
+function get_count_users( $users, string $strategy, int $blog_id ) {
 	if ( $users ) {
 		return $users;
 	}
