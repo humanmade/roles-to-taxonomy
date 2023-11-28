@@ -215,7 +215,7 @@ function add_has_published_posts_clauses_to_wp_user_query( WP_User_Query $query 
 		return;
 	}
 
-	$blog_id = $query->get( 'origin_blog_id' );
+	$blog_id = $query->get( 'original_blog_id' );
 
 	if ( true === $query->get( 'has_published_posts' ) ) {
 		$post_types = get_post_types( [ 'public' => true ] );
