@@ -11,7 +11,7 @@ class CLI_Command extends WP_CLI_Command {
 	/**
 	 * Synchronise taxonomy term counts with user roles from user_meta.
 	 *
-	 * @synopsis [--verbose] [--batch-size=<number>] [--progress] [--offset=<number>] [--fast-populate] [--limit=<number>]
+	 * @synopsis [--verbose] [--batch-size=<number>] [--progress] [--offset=<number>] [--fast-populate] [--limit=<number>] [--roles=<list>]
 	 *
 	 * @param array $args
 	 * @param array $args_assoc
@@ -27,8 +27,13 @@ class CLI_Command extends WP_CLI_Command {
 				'offset'        => 0,
 				'fast-populate' => false,
 				'limit'         => 0,
+				'roles'         => [],
 			]
 		);
+
+		if ( is_string( $args_assoc['roles'] ) ) {
+			$args_assoc['roles'] = explode( ',', $args_assoc['roles'] );
+		}
 
 		$users_args = [
 			'blog_id'     => null,
@@ -37,8 +42,8 @@ class CLI_Command extends WP_CLI_Command {
 			'fields'      => 'ID',
 			'paged'       => 1,
 			'offset'      => $args_assoc['offset'],
-
 		];
+
 		$synced = 0;
 
 		wp_defer_term_counting( true );
@@ -138,6 +143,11 @@ class CLI_Command extends WP_CLI_Command {
 				foreach ( $users as $user_id ) {
 					$user = get_userdata( $user_id );
 					$role = array_pop( $user->roles );
+
+					if ( ! empty( $args_assoc['roles'] ) && ! in_array( $role, $args_assoc['roles'], true ) ) {
+						continue;
+					}
+
 					set_user_role( $user->ID, $role );
 
 					$synced++;
